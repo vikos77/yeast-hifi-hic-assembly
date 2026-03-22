@@ -1,6 +1,6 @@
 # _S. cerevisiae_ Hi-C Phased Diploid Assembly
 
-Chromosome-level haplotype-resolved genome assembly of baker's yeast using PacBio HiFi + Hi-C data. This is the third project in a long-read assembly learning series, building on lessons from [_E. coli_ HiFi assembly](https://github.com/vikos77/ecoli-hifi-assembly) and [_Candida albicans_ diploid assembly](https://github.com/vikos77/Candida-HIFI-Assembly).
+Chromosome-level haplotype-resolved genome assembly of baker's yeast using PacBio HiFi + Hi-C data. Third pipeline in an assembly benchmark series, extending the approach from [_E. coli_ HiFi assembly](https://github.com/vikos77/ecoli-hifi-assembly) and [_Candida albicans_ diploid assembly](https://github.com/vikos77/Candida-HIFI-Assembly) to demonstrate Hi-C phasing as a solution to the limitations of HiFi-only diploid assembly.
 
 The central question this project answers: **how do you phase a diploid genome when HiFi reads alone aren't enough?**
 
@@ -182,7 +182,7 @@ S. cerevisiae S288C has 16 nuclear chromosomes. Hap1 has 17 contigs. The most li
 
 ---
 
-## Comparative Analysis: The Learning Series
+## Comparative Analysis: Assembly Pipeline Series
 
 | Feature | _E. coli_ | _C. albicans_ | _S. cerevisiae_ |
 |---------|-----------|--------------|----------------|
@@ -197,15 +197,15 @@ S. cerevisiae S288C has 16 nuclear chromosomes. Hap1 has 17 contigs. The most li
 
 ---
 
-## What I Learned
+## Key Findings
 
-**Hi-C is the missing piece for diploid phasing.** Candida showed that HiFi reads alone can't phase a diploid genome — you lose track of which allele is which across homozygous stretches longer than read length. Adding Hi-C changes the problem entirely by providing megabase-scale linkage information. The 432-node Candida graph vs the 0-edge yeast haplotype graphs makes this concrete.
+**Hi-C resolves the phase discontinuity problem in diploid assembly.** HiFi reads alone cannot phase a diploid genome across homozygous stretches longer than read length. Hi-C chromatin contact maps provide megabase-scale linkage, enabling continuous phasing across entire chromosomes. The contrast is quantified directly: 432 nodes / 303 edges in the Candida raw unitig graph vs 0 edges in both yeast haplotype assemblies.
 
-**Assembly graph edges are a phasing quality metric.** Before this project I thought of N50 as the main assembly quality number. After looking at Bandage graphs across all three projects, I now treat the number of remaining edges in the final contig graph as equally important — 0 edges means every contig is unambiguously placed, which is what chromosome-level means in practice.
+**Assembly graph edge count is a phasing quality metric.** N50 measures contiguity but not phasing correctness. The number of remaining edges in the final contig graph is the more informative metric for diploid assemblies — 0 edges means every contig is unambiguously assigned to a haplotype, which is the operational definition of chromosome-level resolution.
 
-**BUSCO duplication measures collapse, not phasing.** The 0.7% duplication in Candida proved the primary assembly was heavily collapsed (both haplotypes merged). The 1.5-1.9% in each yeast haplotype proved the haplotypes were genuinely separated. Understanding this distinction changes how you interpret BUSCO output for diploid assemblies.
+**BUSCO duplication rate measures haplotype collapse, not assembly error.** Low duplication (0.7%) in the Candida `--primary` assembly indicates haplotype collapsing — both alleles merged into one sequence. Low duplication (1.5-1.9%) in each yeast haplotype indicates clean separation — each gene present once per haplotype as expected. These identical numbers carry opposite biological interpretations depending on assembly mode.
 
-**Hap1 ≠ Hap2 biologically.** The 856 kb size difference and 181 additional missing BUSCOs in hap2 reflect real genomic differences between homologous chromosomes — structural variants, copy number differences, rDNA copy number. It is not evidence that the assembly failed. This is what actual diploid genomes look like when you stop collapsing them.
+**Haplotype size asymmetry reflects real genomic differences.** The 856 kb size difference between hap1 and hap2 (12.16 Mb vs 11.30 Mb) and the 181 additional missing BUSCOs in hap2 are consistent with structural variation between homologous chromosomes — not assembly failure. Collapsed assemblies hide this variation; haplotype-resolved assemblies expose it.
 
 ---
 
@@ -283,7 +283,7 @@ bash 04_assessment.sh   # QUAST + BUSCO on hap1 and hap2
 
 ---
 
-## Part of a Learning Series
+## Pipeline Series
 
 1. [**_E. coli_ HiFi Assembly**](https://github.com/vikos77/ecoli-hifi-assembly) — Haploid bacterium, 1 contig, 100% BUSCO
 2. [**_Candida albicans_ Diploid Assembly**](https://github.com/vikos77/Candida-HIFI-Assembly) — Diploid fungus, HiFi-only `--primary`, 209 contigs, 95.8% BUSCO
