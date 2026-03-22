@@ -11,16 +11,16 @@ The central question this project answers: **how do you phase a diploid genome w
 The [Candida assembly](https://github.com/vikos77/Candida-HIFI-Assembly) exposed a fundamental limitation of HiFi-only phasing with `--primary`:
 
 - HiFi reads (mean ~15 kb) can phase heterozygous sites within a single read
-- But long homozygous stretches break phase continuity — the assembler loses track of which allele is which
+- But long homozygous stretches break phase continuity, causing the assembler to lose track of which allele is which
 - Result: 209 fragmented contigs with haplotype switching, a mosaic of both parental chromosomes
 
-**The fix: Hi-C data.** Chromatin contact maps link genomic regions that are physically co-located in the nucleus — even if they're megabases apart in sequence. Two loci on the same chromosome in the same cell will produce far more Hi-C read pairs than loci on different chromosomes. This provides the long-range connectivity to bridge homozygous deserts and assign sequences to the correct haplotype.
+**The fix: Hi-C data.** Chromatin contact maps link genomic regions that are physically co-located in the nucleus, even if they are megabases apart in sequence. Two loci on the same chromosome in the same cell will produce far more Hi-C read pairs than loci on different chromosomes. This provides the long-range connectivity to bridge homozygous deserts and assign sequences to the correct haplotype.
 
 ---
 
 ## Dataset
 
-### HiFi Reads — Zenodo 6098306
+### HiFi Reads (Zenodo 6098306)
 
 Synthetic 50× diploid HiFi dataset for S. cerevisiae S288C:
 
@@ -33,7 +33,7 @@ Synthetic 50× diploid HiFi dataset for S. cerevisiae S288C:
 
 Read length: 12–15 kb average. Source: [Zenodo record 6098306](https://zenodo.org/record/6098306)
 
-### Hi-C Reads — SRR7126301
+### Hi-C Reads (SRR7126301)
 
 | Accession | SRR7126301 (NCBI SRA) |
 |-----------|----------------------|
@@ -42,10 +42,10 @@ Read length: 12–15 kb average. Source: [Zenodo record 6098306](https://zenodo.
 
 ### Organism
 
-**_Saccharomyces cerevisiae_ S288C** — the reference strain for yeast genomics:
+**_Saccharomyces cerevisiae_ S288C**, the reference strain for yeast genomics:
 - Haploid genome: ~12 Mb
 - 16 nuclear chromosomes
-- Heterozygosity: 0.576% (low — enough for phasing demonstration, but benign)
+- Heterozygosity: 0.576% (low, sufficient for phasing demonstration)
 - Gold-standard reference genome R64-2-1 for comparison
 
 ---
@@ -80,7 +80,7 @@ hifiasm -o yeast \
     HiFi_synthetic_50x_03.fasta
 ```
 
-### `--primary` vs `--h1/--h2` — the critical distinction
+### `--primary` vs `--h1/--h2`: key distinction
 
 | Flag | Extra data needed | Phasing reach | Output |
 |------|-------------------|--------------|--------|
@@ -88,7 +88,7 @@ hifiasm -o yeast \
 | `--h1 / --h2` | HiFi + Hi-C | Chromosome-scale (Mb) | Two fully-resolved haplotypes |
 
 **Why `--primary` for Candida:** no Hi-C data was available.
-**Why `--h1/--h2` for yeast:** both HiFi and Hi-C data were available — the right tool for the job.
+**Why `--h1/--h2` for yeast:** both HiFi and Hi-C data were available, making full haplotype resolution possible.
 
 ### How Hi-C Enables Chromosome-Scale Phasing
 
@@ -104,7 +104,7 @@ Hi-C read pairs link loci that are physically close in 3D nuclear space. Because
 - Many Hi-C pairs link SNP-A' ↔ SNP-B' (both on haplotype B)
 - Few pairs cross haplotypes (SNP-A ↔ SNP-B')
 
-hifiasm maps Hi-C reads back onto the assembly graph unitigs, counts within-haplotype vs between-haplotype links, and solves a graph partitioning problem to assign each unitig to haplotype A or B — even across megabases of homozygous sequence.
+hifiasm maps Hi-C reads back onto the assembly graph unitigs, counts within-haplotype vs between-haplotype links, and solves a graph partitioning problem to assign each unitig to haplotype A or B, even across megabases of homozygous sequence.
 
 ---
 
@@ -116,10 +116,10 @@ The difference in graph structure between Candida (HiFi-only) and yeast (HiFi+Hi
 
 | Graph | Nodes | Edges | Total length | What it shows |
 |-------|-------|-------|-------------|--------------|
-| r_utg | 39 | 9 | 23,518,211 bp | Raw unitigs — heterozygous bubbles visible |
+| r_utg | 39 | 9 | 23,518,211 bp | Raw unitigs: heterozygous bubbles visible |
 | p_utg | 35 | 3 | 23,483,448 bp | Spurious overlaps removed |
-| hap1.p_ctg | 17 | **0** | 12,160,988 bp | Haplotype 1 — fully resolved |
-| hap2.p_ctg | 16 | **0** | 11,304,582 bp | Haplotype 2 — fully resolved |
+| hap1.p_ctg | 17 | **0** | 12,160,988 bp | Haplotype 1, fully resolved |
+| hap2.p_ctg | 16 | **0** | 11,304,582 bp | Haplotype 2, fully resolved |
 | p_ctg | 17 | 0 | 12,163,504 bp | Collapsed primary (similar to hap1) |
 
 **0 edges in both haplotype assemblies = chromosome-level phasing success.** Every contig is a standalone chromosome or chromosome arm with no ambiguous connections. Compare to Candida's raw unitig graph: 432 nodes, 303 edges.
@@ -127,27 +127,27 @@ The difference in graph structure between Candida (HiFi-only) and yeast (HiFi+Hi
 **Bandage visualisations:**
 
 ![r_utg graph](figures/Screenshot%20from%202026-01-08%2019-09-36.png)
-*r_utg.gfa — raw unitig graph: 39 nodes, 9 edges. Heterozygous bubbles visible as branching points. Much simpler than Candida (432 nodes, 303 edges) due to lower heterozygosity (0.576% vs ~60%).*
+*r_utg.gfa: raw unitig graph, 39 nodes, 9 edges. Heterozygous bubbles visible as branching points. Much simpler than Candida (432 nodes, 303 edges) due to lower heterozygosity (0.576% vs ~60%).*
 
 ![p_utg graph](figures/Screenshot%20from%202026-01-08%2019-08-52.png)
-*p_utg.gfa — processed unitig graph: 35 nodes, 3 edges. Graph is nearly fully resolved after removing spurious overlaps.*
+*p_utg.gfa: processed unitig graph, 35 nodes, 3 edges. Graph is nearly fully resolved after removing spurious overlaps.*
 
 ![p_ctg graph](figures/Screenshot%20from%202026-01-08%2019-08-13.png)
-*p_ctg.gfa — collapsed primary contigs: 17 nodes, 0 edges. Chromosome-scale contigs with no ambiguous connections.*
+*p_ctg.gfa: collapsed primary contigs, 17 nodes, 0 edges. Chromosome-scale contigs with no ambiguous connections.*
 
 ![hap1 graph](figures/Screenshot%20from%202026-01-08%2019-06-58.png)
-*hap1.p_ctg.gfa — haplotype 1: 17 nodes, 0 edges, 12.16 Mb. Each node is a complete chromosome.*
+*hap1.p_ctg.gfa: haplotype 1, 17 nodes, 0 edges, 12.16 Mb. Each node is a complete chromosome.*
 
 ![hap2 graph](figures/Screenshot%20from%202026-01-08%2019-07-44.png)
-*hap2.p_ctg.gfa — haplotype 2: 16 nodes, 0 edges, 11.30 Mb. One fewer contig than hap1 — see the 17 vs 16 contigs discussion below.*
+*hap2.p_ctg.gfa: haplotype 2, 16 nodes, 0 edges, 11.30 Mb. One fewer contig than hap1 (see the 17 vs 16 contigs discussion below).*
 
 ### BUSCO Completeness (saccharomycetes_odb10, 2137 genes)
 
 | Category | Hap1 | Hap2 |
 |----------|------|------|
 | Complete (total) | 2050 (96.0%) | 1902 (89.1%) |
-| — Single-copy | 2010 (94.1%) | 1871 (87.6%) |
-| — Duplicated | 40 (1.9%) | 31 (1.5%) |
+| &nbsp;&nbsp;Single-copy | 2010 (94.1%) | 1871 (87.6%) |
+| &nbsp;&nbsp;Duplicated | 40 (1.9%) | 31 (1.5%) |
 | Fragmented | 57 (2.7%) | 54 (2.5%) |
 | Missing | 30 (1.3%) | 181 (8.4%) |
 | **Scaffolds** | **17** | **16** |
@@ -156,14 +156,14 @@ The difference in graph structure between Candida (HiFi-only) and yeast (HiFi+Hi
 
 ### Why duplication is ~1-2%, not ~100%
 
-A common misconception: "If haplotypes were truly separated, shouldn't every gene appear twice — 100% duplication?"
+A common misconception: "If haplotypes were truly separated, shouldn't every gene appear twice, giving 100% duplication?"
 
-No. BUSCO runs independently on each haplotype FASTA. Each haplotype should contain each gene **once**. Low duplication (1-2%) means the assembly is clean — genes appear once per haplotype as expected. 100% duplication would indicate a tandem duplication of the entire genome within a single haplotype, which would be an assembly error.
+No. BUSCO runs independently on each haplotype FASTA. Each haplotype should contain each gene **once**. Low duplication (1-2%) means the assembly is clean, with genes appearing once per haplotype as expected. 100% duplication would indicate a tandem duplication of the entire genome within a single haplotype, which would be an assembly error.
 
 | Context | Expected duplication | Meaning |
 |---------|---------------------|---------|
 | Candida `--primary` collapsed | 0-5% | Both haplotypes merged, genes appear once |
-| Yeast hap1 or hap2 | 0-5% | Clean haplotype — genes appear once per haplotype ✓ |
+| Yeast hap1 or hap2 | 0-5% | Clean haplotype: one gene per haplotype ✓ |
 | Assembly error | 50-100% | Whole-genome duplication within one haplotype |
 
 ### Why hap2 is less complete (89.1% vs 96.0%)
@@ -172,13 +172,13 @@ This is expected behaviour for Hi-C phasing of a low-heterozygosity genome, not 
 
 1. **Coverage imbalance**: random read sampling doesn't guarantee exactly 50/50 split; the better-covered haplotype gets a higher-quality assembly
 2. **Ambiguous assignment**: in regions with no distinguishing SNPs, Hi-C preferentially assigns sequences to hap1
-3. **Real biological differences**: hap2 is 856 kb shorter (11.30 Mb vs 12.16 Mb), suggesting structural differences between homologous chromosomes — missing BUSCOs may reflect genuine genomic variation, not assembly gaps
+3. **Real biological differences**: hap2 is 856 kb shorter (11.30 Mb vs 12.16 Mb), suggesting structural differences between homologous chromosomes; missing BUSCOs may reflect genuine genomic variation rather than assembly gaps
 
 Both haplotypes achieved chromosome-level contiguity (16–17 contigs, N50 ~923 kb), which is the primary goal.
 
 ### The 17th contig in hap1
 
-S. cerevisiae S288C has 16 nuclear chromosomes. Hap1 has 17 contigs. The most likely explanation is the **rDNA repeat cluster** on Chr XII — 100–200 copies of a ~9.1 kb repeat unit that is nearly identical across both haplotypes. Assemblers routinely pull this out as a separate contig rather than embedding it within Chr XII. The alternative is a small unplaced telomeric or subtelomeric scaffold. Either way, the chromosome-scale structure is intact.
+S. cerevisiae S288C has 16 nuclear chromosomes. Hap1 has 17 contigs. The most likely explanation is the **rDNA repeat cluster** on Chr XII, comprising 100–200 copies of a ~9.1 kb repeat unit that is nearly identical across both haplotypes. Assemblers routinely pull this out as a separate contig rather than embedding it within Chr XII. The alternative is a small unplaced telomeric or subtelomeric scaffold. Either way, the chromosome-scale structure is intact.
 
 ---
 
@@ -201,11 +201,11 @@ S. cerevisiae S288C has 16 nuclear chromosomes. Hap1 has 17 contigs. The most li
 
 **Hi-C resolves the phase discontinuity problem in diploid assembly.** HiFi reads alone cannot phase a diploid genome across homozygous stretches longer than read length. Hi-C chromatin contact maps provide megabase-scale linkage, enabling continuous phasing across entire chromosomes. The contrast is quantified directly: 432 nodes / 303 edges in the Candida raw unitig graph vs 0 edges in both yeast haplotype assemblies.
 
-**Assembly graph edge count is a phasing quality metric.** N50 measures contiguity but not phasing correctness. The number of remaining edges in the final contig graph is the more informative metric for diploid assemblies — 0 edges means every contig is unambiguously assigned to a haplotype, which is the operational definition of chromosome-level resolution.
+**Assembly graph edge count is a phasing quality metric.** N50 measures contiguity but not phasing correctness. The number of remaining edges in the final contig graph is the more informative metric for diploid assemblies: 0 edges means every contig is unambiguously assigned to a haplotype, which is the operational definition of chromosome-level resolution.
 
-**BUSCO duplication rate measures haplotype collapse, not assembly error.** Low duplication (0.7%) in the Candida `--primary` assembly indicates haplotype collapsing — both alleles merged into one sequence. Low duplication (1.5-1.9%) in each yeast haplotype indicates clean separation — each gene present once per haplotype as expected. These identical numbers carry opposite biological interpretations depending on assembly mode.
+**BUSCO duplication rate measures haplotype collapse, not assembly error.** Low duplication (0.7%) in the Candida `--primary` assembly indicates haplotype collapsing, with both alleles merged into one sequence. Low duplication (1.5-1.9%) in each yeast haplotype indicates clean separation, with each gene present once per haplotype as expected. These identical numbers carry opposite biological interpretations depending on assembly mode.
 
-**Haplotype size asymmetry reflects real genomic differences.** The 856 kb size difference between hap1 and hap2 (12.16 Mb vs 11.30 Mb) and the 181 additional missing BUSCOs in hap2 are consistent with structural variation between homologous chromosomes — not assembly failure. Collapsed assemblies hide this variation; haplotype-resolved assemblies expose it.
+**Haplotype size asymmetry reflects real genomic differences.** The 856 kb size difference between hap1 and hap2 (12.16 Mb vs 11.30 Mb) and the 181 additional missing BUSCOs in hap2 are consistent with structural variation between homologous chromosomes, not assembly failure. Collapsed assemblies hide this variation; haplotype-resolved assemblies expose it.
 
 ---
 
@@ -285,6 +285,6 @@ bash 04_assessment.sh   # QUAST + BUSCO on hap1 and hap2
 
 ## Pipeline Series
 
-1. [**_E. coli_ HiFi Assembly**](https://github.com/vikos77/ecoli-hifi-assembly) — Haploid bacterium, 1 contig, 100% BUSCO
-2. [**_Candida albicans_ Diploid Assembly**](https://github.com/vikos77/Candida-HIFI-Assembly) — Diploid fungus, HiFi-only `--primary`, 209 contigs, 95.8% BUSCO
-3. **_S. cerevisiae_ Hi-C Phased Assembly** (this repo) — Diploid yeast, HiFi+Hi-C, 17+16 contigs, chromosome-level, 96%/89% BUSCO
+1. [**_E. coli_ HiFi Assembly**](https://github.com/vikos77/ecoli-hifi-assembly): haploid bacterium, 1 contig, 100% BUSCO
+2. [**_Candida albicans_ Diploid Assembly**](https://github.com/vikos77/Candida-HIFI-Assembly): diploid fungus, HiFi-only `--primary`, 209 contigs, 95.8% BUSCO
+3. **_S. cerevisiae_ Hi-C Phased Assembly** (this repo): diploid yeast, HiFi+Hi-C, 17+16 contigs, chromosome-level, 96%/89% BUSCO
