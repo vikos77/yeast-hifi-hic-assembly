@@ -1,0 +1,27 @@
+# Large sequencing data files
+data/*.fasta
+data/*.fastq
+data/*.fastq.gz
+data/*.bam
+data/*.sam
+
+# Large assembly output
+results/assembly/hap1.fasta
+results/assembly/hap2.fasta
+*.bin
+*.gfa
+
+# BUSCO run directories (large)
+results/assessment/busco_hap1/run_saccharomycetes_odb10/
+results/assessment/busco_hap2/run_saccharomycetes_odb10/
+results/assessment/busco_hap1/logs/
+results/assessment/busco_hap2/logs/
+
+# Large QUAST report formats (keep .txt and .tsv)
+*.html
+*.pdf
+*.tex
+
+# Allow metadata in data/
+!data/*.md
+!data/*.txt
